@@ -63,6 +63,7 @@ func (m *stdAgentManager) Serve() AgentManager {
 					return
 				}
 				grpcConn, err := grpc.Dial("",
+					grpc.WithChainUnaryInterceptor(a.GrpcUnaryClientInterceptor()),
 					grpc.WithInsecure(),
 					grpc.WithContextDialer(func(ctx context.Context, _ string) (net.Conn, error) {
 						return connToClient, nil
@@ -83,7 +84,9 @@ func (m *stdAgentManager) Serve() AgentManager {
 			}()
 
 			go func() {
-				s := grpc.NewServer(grpc.ChainUnaryInterceptor())
+				s := grpc.NewServer(
+					grpc.ChainUnaryInterceptor(a.GrpcUnaryServerInterceptor()),
+				)
 				agentV1.RegisterBackendServiceServer(s, &agentAuthService{manager: m, agent: a})
 				s.Serve(&smuxWarp{Session: a.mux})
 			}()

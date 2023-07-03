@@ -31,6 +31,7 @@ var serverCmd = &cobra.Command{
 			time.Sleep(3 * time.Second)
 			fmt.Println("agent list:")
 			for _, agent := range manager.List() {
+				fmt.Printf("agent: %s \nlast seen: %v\n", agent.ID(), agent.LastSeen())
 				agentInfo, err := agent.AgentInfo(context.Background(), &agentV1.AgentInfoRequest{})
 				if err != nil {
 					if status.Code(err) == codes.Unavailable {
