@@ -3,7 +3,7 @@ package manage
 import (
 	"context"
 	"fmt"
-	"github.com/xtaci/smux"
+	"github.com/asjdf/smux"
 	"google.golang.org/grpc"
 	agentV1 "grpc-reverse-test/gen/proto/agent/v1"
 	"net"

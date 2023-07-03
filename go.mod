@@ -3,9 +3,8 @@ module grpc-reverse-test
 go 1.20
 
 require (
-	github.com/HuanTeng/grpc-tun v0.0.0-20190728085500-2f326a35d4ef
+	github.com/asjdf/smux v1.0.2
 	github.com/spf13/cobra v1.7.0
-	github.com/xtaci/smux v1.5.24
 	golang.org/x/tools v0.10.0
 	google.golang.org/grpc v1.56.1
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.3.0

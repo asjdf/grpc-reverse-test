@@ -3,10 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/asjdf/smux"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	agentV1 "grpc-reverse-test/gen/proto/agent/v1"
-	"grpc-reverse-test/pkg/grpcTun"
 	"math/rand"
 	"net"
 	"os"
@@ -26,8 +26,9 @@ var clientCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		c := grpcTun.NewClient().Conn(conn)
-		err = c.Init()
+		muxConf := smux.DefaultConfig()
+		muxConf.Version = 2
+		mux, err := smux.Client(conn, muxConf)
 		if err != nil {
 			return err
 		}
@@ -35,12 +36,12 @@ var clientCmd = &cobra.Command{
 		go func() {
 			s := grpc.NewServer()
 			agentV1.RegisterAgentServiceServer(s, &agentService{})
-			s.Serve(c) // 在这里实现一个net.listener
+			s.Serve(mux) // 在这里实现一个net.listener
 		}()
 
 		go func() {
 			fmt.Println("start open stream")
-			connToBackend, err := c.OpenStream()
+			connToBackend, err := mux.OpenStream()
 			if err != nil {
 				fmt.Printf("open conn to server error: %v\n", err)
 				return
@@ -52,11 +53,14 @@ var clientCmd = &cobra.Command{
 					return connToBackend, nil
 				}),
 			)
+			fmt.Println("start auth")
 			be := agentV1.NewBackendServiceClient(grpcConn)
 			for {
 				if _, err := be.AgentAuth(context.Background(),
 					&agentV1.AgentAuthRequest{AgentID: fmt.Sprintf("%d", id), Token: "demoToken"}); err == nil {
 					break
+				} else {
+					fmt.Println(err)
 				}
 				time.Sleep(time.Second)
 			}

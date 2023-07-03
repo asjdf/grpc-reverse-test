@@ -3,7 +3,7 @@ package manage
 import (
 	"context"
 	"fmt"
-	"github.com/xtaci/smux"
+	"github.com/asjdf/smux"
 	"google.golang.org/grpc"
 	agentV1 "grpc-reverse-test/gen/proto/agent/v1"
 	"grpc-reverse-test/pkg/syncx"
@@ -56,12 +56,15 @@ func (m *stdAgentManager) Serve() AgentManager {
 				continue
 			}
 
+			fmt.Printf("IP: %v,IP: %v\n", m.listener.Addr(), a.mux.Addr())
+
 			go func() {
 				connToClient, err := a.mux.OpenStream()
 				if err != nil {
 					fmt.Printf("open conn to client error: %v\n", err)
 					return
 				}
+				fmt.Println("trying to dial's client rpc server")
 				grpcConn, err := grpc.Dial("",
 					grpc.WithChainUnaryInterceptor(a.GrpcUnaryClientInterceptor()),
 					grpc.WithInsecure(),
@@ -88,7 +91,7 @@ func (m *stdAgentManager) Serve() AgentManager {
 					grpc.ChainUnaryInterceptor(a.GrpcUnaryServerInterceptor()),
 				)
 				agentV1.RegisterBackendServiceServer(s, &agentAuthService{manager: m, agent: a})
-				s.Serve(&smuxWarp{Session: a.mux})
+				s.Serve(a.mux)
 			}()
 		}
 	}()
@@ -133,17 +136,6 @@ func (a *agentAuthService) AgentAuth(ctx context.Context, request *agentV1.Agent
 		fmt.Println("auth failed")
 		a.agent.Disconnect()
 	}
+
 	return &agentV1.AgentAuthResponse{Success: true}, nil
-}
-
-type smuxWarp struct {
-	*smux.Session
-}
-
-func (s *smuxWarp) Accept() (net.Conn, error) {
-	return s.Session.AcceptStream()
-}
-
-func (s *smuxWarp) Addr() net.Addr {
-	return s.Session.LocalAddr()
 }

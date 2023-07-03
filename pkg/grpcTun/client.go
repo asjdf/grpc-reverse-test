@@ -1,7 +1,7 @@
 package grpcTun
 
 import (
-	"github.com/xtaci/smux"
+	"github.com/asjdf/smux"
 	"net"
 )
 
