@@ -56,8 +56,6 @@ func (m *stdAgentManager) Serve() AgentManager {
 				continue
 			}
 
-			fmt.Printf("IP: %v,IP: %v\n", m.listener.Addr(), a.mux.Addr())
-
 			go func() {
 				connToClient, err := a.mux.OpenStream()
 				if err != nil {

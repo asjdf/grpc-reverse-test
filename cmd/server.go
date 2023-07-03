@@ -27,25 +27,25 @@ var serverCmd = &cobra.Command{
 
 		manager := manage.NewAgentManager().Listen(listener).Serve()
 
-		for {
-			time.Sleep(3 * time.Second)
-			fmt.Println("agent list:")
-			for _, agent := range manager.List() {
-				fmt.Printf("agent: %s \nlast seen: %v\n", agent.ID(), agent.LastSeen())
-				agentInfo, err := agent.AgentInfo(context.Background(), &agentV1.AgentInfoRequest{})
-				if err != nil {
-					if status.Code(err) == codes.Unavailable {
-						fmt.Printf("agent %s offline\n", agent.ID())
-						agent.Disconnect()
-						continue
+		go func() {
+			for {
+				time.Sleep(3 * time.Second)
+				fmt.Println("agent list:")
+				for _, agent := range manager.List() {
+					fmt.Printf("agent: %s \n\tlast seen: %v\n", agent.ID(), agent.LastSeen())
+					_, err := agent.AgentInfo(context.Background(), &agentV1.AgentInfoRequest{})
+					if err != nil {
+						if status.Code(err) == codes.Unavailable {
+							fmt.Printf("agent %s offline\n", agent.ID())
+							agent.Disconnect()
+							continue
+						}
+						fmt.Printf("get agent info error: %v\n", err)
+						panic(err)
 					}
-					fmt.Printf("get agent info error: %v\n", err)
-					return err
-				} else {
-					fmt.Printf("%s\n", agentInfo.AgentID)
 				}
 			}
-		}
+		}()
 
 		ch := make(chan os.Signal, 1)
 		signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
