@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	agentV1 "grpc-reverse-test/gen/proto/agent/v1"
 	"grpc-reverse-test/server/manage"
 	"net"
@@ -26,11 +28,16 @@ var serverCmd = &cobra.Command{
 		manager := manage.NewAgentManager().Listen(listener).Serve()
 
 		for {
-			time.Sleep(5 * time.Second)
+			time.Sleep(3 * time.Second)
 			fmt.Println("agent list:")
 			for _, agent := range manager.List() {
 				agentInfo, err := agent.AgentInfo(context.Background(), &agentV1.AgentInfoRequest{})
 				if err != nil {
+					if status.Code(err) == codes.Unavailable {
+						fmt.Printf("agent %s offline\n", agent.ID())
+						agent.Disconnect()
+						continue
+					}
 					fmt.Printf("get agent info error: %v\n", err)
 					return err
 				} else {

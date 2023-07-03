@@ -17,8 +17,10 @@ type AgentManager interface {
 	List() (list []Agent)
 	// Get agent by agentID
 	Get(agentID string) (Agent, bool)
-	// RegAgent add agent to manager
-	RegAgent(agentID string, a Agent)
+	// Reg agent to manager
+	Reg(agentID string, a Agent)
+	// Remove agent from manager
+	Remove(agentID string)
 }
 
 func NewAgentManager() AgentManager {
@@ -45,7 +47,7 @@ func (m *stdAgentManager) Serve() AgentManager {
 				continue
 			}
 
-			a := &agent{}
+			a := &agent{manager: m}
 			muxConf := smux.DefaultConfig()
 			muxConf.Version = 2
 			a.mux, err = smux.Server(conn, muxConf)
@@ -76,11 +78,12 @@ func (m *stdAgentManager) Serve() AgentManager {
 					return
 				} else {
 					fmt.Printf("agent connected: id = %s\n", agentInfo.AgentID)
+					a.id = agentInfo.AgentID
 				}
 			}()
 
 			go func() {
-				s := grpc.NewServer()
+				s := grpc.NewServer(grpc.ChainUnaryInterceptor())
 				agentV1.RegisterBackendServiceServer(s, &agentAuthService{manager: m, agent: a})
 				s.Serve(&smuxWarp{Session: a.mux})
 			}()
@@ -103,8 +106,12 @@ func (m *stdAgentManager) Get(agentID string) (Agent, bool) {
 	return m.agent.Load(agentID)
 }
 
-func (m *stdAgentManager) RegAgent(agentID string, a Agent) {
+func (m *stdAgentManager) Reg(agentID string, a Agent) {
 	m.agent.Store(agentID, a)
+}
+
+func (m *stdAgentManager) Remove(agentID string) {
+	m.agent.Delete(agentID)
 }
 
 type agentAuthService struct {
@@ -118,7 +125,7 @@ func (a *agentAuthService) AgentAuth(ctx context.Context, request *agentV1.Agent
 	if request.Token == "demoToken" {
 		fmt.Println("auth seccess")
 		a.agent.Init()
-		a.manager.RegAgent(request.AgentID, a.agent)
+		a.manager.Reg(request.AgentID, a.agent)
 	} else {
 		fmt.Println("auth failed")
 		a.agent.Disconnect()

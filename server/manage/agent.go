@@ -12,15 +12,23 @@ import (
 type Agent interface {
 	agentV1.AgentServiceClient
 
+	ID() string
 	Init() error // InitAfterAuthPassed
 	Disconnect() error
 }
 
 type agent struct {
-	mux  *smux.Session
-	conn *grpc.ClientConn
+	id string
+
+	manager AgentManager
+	mux     *smux.Session
+	conn    *grpc.ClientConn
 
 	agentV1.AgentServiceClient
+}
+
+func (a *agent) ID() string {
+	return a.id
 }
 
 func (a *agent) Init() error {
@@ -42,7 +50,10 @@ func (a *agent) Init() error {
 	return nil
 }
 
+// Disconnect will remove the agent from manager's
+// agentPool disconnect the agent.
 func (a *agent) Disconnect() error {
+	a.manager.Remove(a.id)
 	a.conn.Close()
 	a.mux.Close()
 	return nil
