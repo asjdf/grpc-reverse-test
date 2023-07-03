@@ -62,8 +62,8 @@ func (a *agent) Init() error {
 // agentPool disconnect the agent.
 func (a *agent) Disconnect() error {
 	a.manager.Remove(a.id)
-	a.conn.Close()
-	a.mux.Close()
+	_ = a.conn.Close()
+	_ = a.mux.Close()
 	return nil
 }
 
