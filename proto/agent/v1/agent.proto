@@ -2,7 +2,7 @@ syntax = "proto3";
 package agent.v1;
 option go_package = "grpc-reverse-test/gen/proto/go/agent/v1;agentV1";
 
-service DistributeService{
+service AgentService{
   rpc AgentInfo(AgentInfoRequest) returns (AgentInfoResponse) {}
   rpc AgentStatus(AgentStatusRequest) returns (AgentStatusResponse) {}
 }
@@ -29,6 +29,15 @@ message IssueResponse {
   uint64 id = 1;
 }
 
-service TaskService {
-  rpc Issue(stream IssueRequest) returns (stream IssueResponse) {}
+service BackendService {
+  rpc AgentAuth(AgentAuthRequest) returns (AgentAuthResponse){}
+}
+
+message AgentAuthRequest{
+  string AgentID = 1;
+  string Token = 2;
+}
+
+message AgentAuthResponse{
+  bool Success = 1;
 }

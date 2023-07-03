@@ -26,6 +26,10 @@ func (c *Client) Addr() net.Addr {
 	return c.mux.LocalAddr()
 }
 
+func (c *Client) OpenStream() (*smux.Stream, error) {
+	return c.mux.OpenStream()
+}
+
 func NewClient() *Client {
 	return &Client{}
 }

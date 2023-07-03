@@ -11,7 +11,11 @@ type Server struct {
 	listener net.Listener
 	mux      *smux.Session
 
-	onConnect func(conn net.Conn) error
+	onClientConnect func(conn net.Conn)
+}
+
+type ClientSession struct {
+	mux *smux.Session
 }
 
 func NewServer() *Server {
@@ -23,7 +27,7 @@ func (s *Server) Listen(l net.Listener) *Server {
 	return s
 }
 
-func (s *Server) Init() (err error) {
+func (s *Server) Init() {
 	go func() {
 		for {
 			conn, err := s.listener.Accept()
@@ -31,25 +35,27 @@ func (s *Server) Init() (err error) {
 				fmt.Printf("accept error: %v\n", err)
 				continue
 			}
+
+			session := &ClientSession{}
 			muxConf := smux.DefaultConfig()
 			muxConf.Version = 2
-			s.mux, err = smux.Server(conn, muxConf)
+			session.mux, err = smux.Server(conn, muxConf)
 			if err != nil {
 				fmt.Printf("init smux error: %v\n", err)
 				continue
 			}
-			stream, err := s.mux.OpenStream()
+			connToClient, err := session.mux.OpenStream()
 			if err != nil {
-				fmt.Printf("open stream error: %v\n", err)
+				fmt.Printf("open conn to client error: %v\n", err)
 				continue
 			}
-			go s.onConnect(stream)
+			go s.onClientConnect(connToClient)
 		}
 	}()
-	return nil
+	return
 }
 
-func (s *Server) OnConnect(f func(conn net.Conn) error) *Server {
-	s.onConnect = f
+func (s *Server) OnClientConnect(f func(conn net.Conn)) *Server {
+	s.onClientConnect = f
 	return s
 }

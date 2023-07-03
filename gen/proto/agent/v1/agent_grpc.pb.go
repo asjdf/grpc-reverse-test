@@ -18,242 +18,210 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// DistributeServiceClient is the client API for DistributeService service.
+// AgentServiceClient is the client API for AgentService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type DistributeServiceClient interface {
+type AgentServiceClient interface {
 	AgentInfo(ctx context.Context, in *AgentInfoRequest, opts ...grpc.CallOption) (*AgentInfoResponse, error)
 	AgentStatus(ctx context.Context, in *AgentStatusRequest, opts ...grpc.CallOption) (*AgentStatusResponse, error)
 }
 
-type distributeServiceClient struct {
+type agentServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewDistributeServiceClient(cc grpc.ClientConnInterface) DistributeServiceClient {
-	return &distributeServiceClient{cc}
+func NewAgentServiceClient(cc grpc.ClientConnInterface) AgentServiceClient {
+	return &agentServiceClient{cc}
 }
 
-func (c *distributeServiceClient) AgentInfo(ctx context.Context, in *AgentInfoRequest, opts ...grpc.CallOption) (*AgentInfoResponse, error) {
+func (c *agentServiceClient) AgentInfo(ctx context.Context, in *AgentInfoRequest, opts ...grpc.CallOption) (*AgentInfoResponse, error) {
 	out := new(AgentInfoResponse)
-	err := c.cc.Invoke(ctx, "/agent.v1.DistributeService/AgentInfo", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/agent.v1.AgentService/AgentInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *distributeServiceClient) AgentStatus(ctx context.Context, in *AgentStatusRequest, opts ...grpc.CallOption) (*AgentStatusResponse, error) {
+func (c *agentServiceClient) AgentStatus(ctx context.Context, in *AgentStatusRequest, opts ...grpc.CallOption) (*AgentStatusResponse, error) {
 	out := new(AgentStatusResponse)
-	err := c.cc.Invoke(ctx, "/agent.v1.DistributeService/AgentStatus", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/agent.v1.AgentService/AgentStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// DistributeServiceServer is the server API for DistributeService service.
-// All implementations must embed UnimplementedDistributeServiceServer
+// AgentServiceServer is the server API for AgentService service.
+// All implementations must embed UnimplementedAgentServiceServer
 // for forward compatibility
-type DistributeServiceServer interface {
+type AgentServiceServer interface {
 	AgentInfo(context.Context, *AgentInfoRequest) (*AgentInfoResponse, error)
 	AgentStatus(context.Context, *AgentStatusRequest) (*AgentStatusResponse, error)
-	mustEmbedUnimplementedDistributeServiceServer()
+	mustEmbedUnimplementedAgentServiceServer()
 }
 
-// UnimplementedDistributeServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedDistributeServiceServer struct {
+// UnimplementedAgentServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedAgentServiceServer struct {
 }
 
-func (UnimplementedDistributeServiceServer) AgentInfo(context.Context, *AgentInfoRequest) (*AgentInfoResponse, error) {
+func (UnimplementedAgentServiceServer) AgentInfo(context.Context, *AgentInfoRequest) (*AgentInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AgentInfo not implemented")
 }
-func (UnimplementedDistributeServiceServer) AgentStatus(context.Context, *AgentStatusRequest) (*AgentStatusResponse, error) {
+func (UnimplementedAgentServiceServer) AgentStatus(context.Context, *AgentStatusRequest) (*AgentStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AgentStatus not implemented")
 }
-func (UnimplementedDistributeServiceServer) mustEmbedUnimplementedDistributeServiceServer() {}
+func (UnimplementedAgentServiceServer) mustEmbedUnimplementedAgentServiceServer() {}
 
-// UnsafeDistributeServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to DistributeServiceServer will
+// UnsafeAgentServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to AgentServiceServer will
 // result in compilation errors.
-type UnsafeDistributeServiceServer interface {
-	mustEmbedUnimplementedDistributeServiceServer()
+type UnsafeAgentServiceServer interface {
+	mustEmbedUnimplementedAgentServiceServer()
 }
 
-func RegisterDistributeServiceServer(s grpc.ServiceRegistrar, srv DistributeServiceServer) {
-	s.RegisterService(&DistributeService_ServiceDesc, srv)
+func RegisterAgentServiceServer(s grpc.ServiceRegistrar, srv AgentServiceServer) {
+	s.RegisterService(&AgentService_ServiceDesc, srv)
 }
 
-func _DistributeService_AgentInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AgentService_AgentInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AgentInfoRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DistributeServiceServer).AgentInfo(ctx, in)
+		return srv.(AgentServiceServer).AgentInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/agent.v1.DistributeService/AgentInfo",
+		FullMethod: "/agent.v1.AgentService/AgentInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DistributeServiceServer).AgentInfo(ctx, req.(*AgentInfoRequest))
+		return srv.(AgentServiceServer).AgentInfo(ctx, req.(*AgentInfoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DistributeService_AgentStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AgentService_AgentStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AgentStatusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DistributeServiceServer).AgentStatus(ctx, in)
+		return srv.(AgentServiceServer).AgentStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/agent.v1.DistributeService/AgentStatus",
+		FullMethod: "/agent.v1.AgentService/AgentStatus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DistributeServiceServer).AgentStatus(ctx, req.(*AgentStatusRequest))
+		return srv.(AgentServiceServer).AgentStatus(ctx, req.(*AgentStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// DistributeService_ServiceDesc is the grpc.ServiceDesc for DistributeService service.
+// AgentService_ServiceDesc is the grpc.ServiceDesc for AgentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var DistributeService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "agent.v1.DistributeService",
-	HandlerType: (*DistributeServiceServer)(nil),
+var AgentService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "agent.v1.AgentService",
+	HandlerType: (*AgentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "AgentInfo",
-			Handler:    _DistributeService_AgentInfo_Handler,
+			Handler:    _AgentService_AgentInfo_Handler,
 		},
 		{
 			MethodName: "AgentStatus",
-			Handler:    _DistributeService_AgentStatus_Handler,
+			Handler:    _AgentService_AgentStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "agent/v1/agent.proto",
 }
 
-// TaskServiceClient is the client API for TaskService service.
+// BackendServiceClient is the client API for BackendService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type TaskServiceClient interface {
-	Issue(ctx context.Context, opts ...grpc.CallOption) (TaskService_IssueClient, error)
+type BackendServiceClient interface {
+	AgentAuth(ctx context.Context, in *AgentAuthRequest, opts ...grpc.CallOption) (*AgentAuthResponse, error)
 }
 
-type taskServiceClient struct {
+type backendServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewTaskServiceClient(cc grpc.ClientConnInterface) TaskServiceClient {
-	return &taskServiceClient{cc}
+func NewBackendServiceClient(cc grpc.ClientConnInterface) BackendServiceClient {
+	return &backendServiceClient{cc}
 }
 
-func (c *taskServiceClient) Issue(ctx context.Context, opts ...grpc.CallOption) (TaskService_IssueClient, error) {
-	stream, err := c.cc.NewStream(ctx, &TaskService_ServiceDesc.Streams[0], "/agent.v1.TaskService/Issue", opts...)
+func (c *backendServiceClient) AgentAuth(ctx context.Context, in *AgentAuthRequest, opts ...grpc.CallOption) (*AgentAuthResponse, error) {
+	out := new(AgentAuthResponse)
+	err := c.cc.Invoke(ctx, "/agent.v1.BackendService/AgentAuth", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &taskServiceIssueClient{stream}
-	return x, nil
+	return out, nil
 }
 
-type TaskService_IssueClient interface {
-	Send(*IssueRequest) error
-	Recv() (*IssueResponse, error)
-	grpc.ClientStream
-}
-
-type taskServiceIssueClient struct {
-	grpc.ClientStream
-}
-
-func (x *taskServiceIssueClient) Send(m *IssueRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *taskServiceIssueClient) Recv() (*IssueResponse, error) {
-	m := new(IssueResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-// TaskServiceServer is the server API for TaskService service.
-// All implementations must embed UnimplementedTaskServiceServer
+// BackendServiceServer is the server API for BackendService service.
+// All implementations must embed UnimplementedBackendServiceServer
 // for forward compatibility
-type TaskServiceServer interface {
-	Issue(TaskService_IssueServer) error
-	mustEmbedUnimplementedTaskServiceServer()
+type BackendServiceServer interface {
+	AgentAuth(context.Context, *AgentAuthRequest) (*AgentAuthResponse, error)
+	mustEmbedUnimplementedBackendServiceServer()
 }
 
-// UnimplementedTaskServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedTaskServiceServer struct {
+// UnimplementedBackendServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedBackendServiceServer struct {
 }
 
-func (UnimplementedTaskServiceServer) Issue(TaskService_IssueServer) error {
-	return status.Errorf(codes.Unimplemented, "method Issue not implemented")
+func (UnimplementedBackendServiceServer) AgentAuth(context.Context, *AgentAuthRequest) (*AgentAuthResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AgentAuth not implemented")
 }
-func (UnimplementedTaskServiceServer) mustEmbedUnimplementedTaskServiceServer() {}
+func (UnimplementedBackendServiceServer) mustEmbedUnimplementedBackendServiceServer() {}
 
-// UnsafeTaskServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TaskServiceServer will
+// UnsafeBackendServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to BackendServiceServer will
 // result in compilation errors.
-type UnsafeTaskServiceServer interface {
-	mustEmbedUnimplementedTaskServiceServer()
+type UnsafeBackendServiceServer interface {
+	mustEmbedUnimplementedBackendServiceServer()
 }
 
-func RegisterTaskServiceServer(s grpc.ServiceRegistrar, srv TaskServiceServer) {
-	s.RegisterService(&TaskService_ServiceDesc, srv)
+func RegisterBackendServiceServer(s grpc.ServiceRegistrar, srv BackendServiceServer) {
+	s.RegisterService(&BackendService_ServiceDesc, srv)
 }
 
-func _TaskService_Issue_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(TaskServiceServer).Issue(&taskServiceIssueServer{stream})
-}
-
-type TaskService_IssueServer interface {
-	Send(*IssueResponse) error
-	Recv() (*IssueRequest, error)
-	grpc.ServerStream
-}
-
-type taskServiceIssueServer struct {
-	grpc.ServerStream
-}
-
-func (x *taskServiceIssueServer) Send(m *IssueResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *taskServiceIssueServer) Recv() (*IssueRequest, error) {
-	m := new(IssueRequest)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _BackendService_AgentAuth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AgentAuthRequest)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(BackendServiceServer).AgentAuth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/agent.v1.BackendService/AgentAuth",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BackendServiceServer).AgentAuth(ctx, req.(*AgentAuthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
-// TaskService_ServiceDesc is the grpc.ServiceDesc for TaskService service.
+// BackendService_ServiceDesc is the grpc.ServiceDesc for BackendService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var TaskService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "agent.v1.TaskService",
-	HandlerType: (*TaskServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams: []grpc.StreamDesc{
+var BackendService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "agent.v1.BackendService",
+	HandlerType: (*BackendServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
 		{
-			StreamName:    "Issue",
-			Handler:       _TaskService_Issue_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
+			MethodName: "AgentAuth",
+			Handler:    _BackendService_AgentAuth_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "agent/v1/agent.proto",
 }

@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 // Client此时实际上是提供服务的server端
@@ -30,9 +31,38 @@ var clientCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		s := grpc.NewServer()
-		agentV1.RegisterDistributeServiceServer(s, &distributeService{})
-		s.Serve(c) // 在这里实现一个net.listener
+
+		go func() {
+			s := grpc.NewServer()
+			agentV1.RegisterAgentServiceServer(s, &agentService{})
+			s.Serve(c) // 在这里实现一个net.listener
+		}()
+
+		go func() {
+			fmt.Println("start open stream")
+			connToBackend, err := c.OpenStream()
+			if err != nil {
+				fmt.Printf("open conn to server error: %v\n", err)
+				return
+			}
+			fmt.Println("start dial")
+			grpcConn, err := grpc.Dial("",
+				grpc.WithInsecure(),
+				grpc.WithContextDialer(func(ctx context.Context, _ string) (net.Conn, error) {
+					return connToBackend, nil
+				}),
+			)
+			be := agentV1.NewBackendServiceClient(grpcConn)
+			for {
+				if _, err := be.AgentAuth(context.Background(),
+					&agentV1.AgentAuthRequest{AgentID: fmt.Sprintf("%d", id), Token: "demoToken"}); err == nil {
+					break
+				}
+				time.Sleep(time.Second)
+			}
+
+			fmt.Println("auth finished")
+		}()
 
 		ch := make(chan os.Signal, 1)
 		signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
@@ -42,19 +72,19 @@ var clientCmd = &cobra.Command{
 	},
 }
 
-type distributeService struct {
-	agentV1.UnimplementedDistributeServiceServer
+type agentService struct {
+	agentV1.UnimplementedAgentServiceServer
 }
 
 var id = rand.Int63()
 
-func (d *distributeService) AgentInfo(ctx context.Context, request *agentV1.AgentInfoRequest) (*agentV1.AgentInfoResponse, error) {
+func (d *agentService) AgentInfo(ctx context.Context, request *agentV1.AgentInfoRequest) (*agentV1.AgentInfoResponse, error) {
 	return &agentV1.AgentInfoResponse{
 		AgentID: fmt.Sprintf("%d", id),
 	}, nil
 }
 
-func (d *distributeService) AgentStatus(ctx context.Context, request *agentV1.AgentStatusRequest) (*agentV1.AgentStatusResponse, error) {
+func (d *agentService) AgentStatus(ctx context.Context, request *agentV1.AgentStatusRequest) (*agentV1.AgentStatusResponse, error) {
 	//TODO implement me
 	panic("implement me")
 }
